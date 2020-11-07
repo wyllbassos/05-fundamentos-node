@@ -3,17 +3,23 @@ import { v4 as uuid } from 'uuid';
 class Transaction {
   id: string;
 
-  title: string;
+  date: Date;
 
-  value: number;
+  title: string;
 
   type: 'income' | 'outcome';
 
-  constructor({ title, value, type }: Omit<Transaction, 'id'>) {
+  value: number;
+
+  total: number;
+
+  constructor({ title, value, type, total }: Omit<Transaction, 'id' | 'date'>) {
     this.id = uuid();
+    this.date = new Date();
     this.title = title;
-    this.value = value;
     this.type = type;
+    this.value = value;
+    this.total = total;
   }
 }
 
