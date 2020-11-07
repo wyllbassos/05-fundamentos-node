@@ -1,6 +1,11 @@
-import Balance from '../models/Balance';
 import Transaction from '../models/Transaction';
-import BalanceRepository from './BalanceRepository';
+
+interface Balance {
+  date: Date;
+  income: number;
+  outcome: number;
+  total: number;
+}
 
 interface CreateTransaction {
   title: string;
@@ -11,11 +16,16 @@ interface CreateTransaction {
 class TransactionsRepository {
   private transactions: Transaction[];
 
-  private balanceRepository: BalanceRepository;
+  private privateBalance: Balance;
 
-  constructor(balanceRepository: BalanceRepository) {
+  constructor() {
     this.transactions = [];
-    this.balanceRepository = balanceRepository;
+    this.privateBalance = {
+      date: new Date(),
+      income: 0,
+      outcome: 0,
+      total: 0,
+    };
   }
 
   public all(): Transaction[] {
@@ -23,23 +33,40 @@ class TransactionsRepository {
   }
 
   public getBalance(): Balance {
-    return this.balanceRepository.getBalance();
+    return this.privateBalance;
   }
 
   public create({ title, value, type }: CreateTransaction): Transaction {
-    if (type === 'income') this.balanceRepository.addIncome(value);
-    if (type === 'outcome') this.balanceRepository.addOutcome(value);
-
     const transaction: Transaction = new Transaction({
       title,
       value,
       type,
-      total: this.balanceRepository.getBalance().total,
+      total: 0,
     });
-
     this.transactions.push(transaction);
+    this.updateBalance();
+    const { total } = this.getBalance();
+    this.transactions[this.transactions.length - 1].total = total;
+    return this.transactions[this.transactions.length - 1];
+  }
 
-    return transaction;
+  private updateBalance(): void {
+    const income = this.transactions
+      .filter(({ type }) => type === 'income')
+      .reduce((total, { value }) => total + value, 0);
+
+    const outcome = this.transactions
+      .filter(({ type }) => type === 'outcome')
+      .reduce((total, { value }) => total + value, 0);
+
+    const total = income - outcome;
+
+    this.privateBalance = {
+      date: new Date(),
+      income,
+      outcome,
+      total,
+    };
   }
 }
 

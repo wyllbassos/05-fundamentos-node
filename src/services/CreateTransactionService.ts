@@ -1,6 +1,5 @@
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import Transaction from '../models/Transaction';
-import BalanceRepository from '../repositories/BalanceRepository';
 
 interface Request {
   title: string;
@@ -11,14 +10,8 @@ interface Request {
 class CreateTransactionService {
   private transactionsRepository: TransactionsRepository;
 
-  private balanceRepository: BalanceRepository;
-
-  constructor(
-    transactionsRepository: TransactionsRepository,
-    balanceRepository: BalanceRepository,
-  ) {
+  constructor(transactionsRepository: TransactionsRepository) {
     this.transactionsRepository = transactionsRepository;
-    this.balanceRepository = balanceRepository;
   }
 
   public execute({ title, value, type }: Request): Transaction {
@@ -40,7 +33,7 @@ class CreateTransactionService {
     }
     if (
       type === 'outcome' &&
-      valueNumber > this.balanceRepository.getBalance().total
+      valueNumber > this.transactionsRepository.getBalance().total
     ) {
       throw new Error("The account don't have a balance to this transaction");
     }

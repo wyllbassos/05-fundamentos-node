@@ -1,18 +1,14 @@
 import { Router } from 'express';
-import BalanceRepository from '../repositories/BalanceRepository';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
 
 const transactionRouter = Router();
 
-const balanceRepository = new BalanceRepository();
-
-const transactionsRepository = new TransactionsRepository(balanceRepository);
+const transactionsRepository = new TransactionsRepository();
 
 const createTransactionService = new CreateTransactionService(
   transactionsRepository,
-  balanceRepository,
 );
 
 transactionRouter.get('/', (request, response) => {
